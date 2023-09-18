@@ -23,12 +23,35 @@ def parser_user_input():
 # for loading molecular count matrix for a list of marker gids with format GID\tSYMBOL\tCTS_CELL1\tCTS_CELL2\t...
 # first column in marker_INFILE contains list of marker gids
 def load_marker_matrix(matrix_INFILE,marker_INFILE):
-    loom = anndata.read_loom(matrix_INFILE, obs_names='', var_names='')
-    markers = pd.read_csv(marker_INFILE, sep='\t', header=None)
-    loom_filter = loom.T[np.isin(loom.T.obs['Accession'],markers[0])].copy().T
-    gids = loom_filter.var['Accession'].values
-    genes = loom_filter.var['Gene'].values
-    matrix = loom_filter.X.todense().T
+    if matrix_INFILE.split('.')[-1] == 'txt':
+        gids = []
+        genes = []
+        matrix = []
+        with open(marker_INFILE) as f:
+            markers = set([line.split()[0] for line in f])
+        with open(matrix_INFILE) as f:
+            for line in f:
+                llist = line.split()
+                gid = llist[0]
+                if gid in markers:
+                    gids.append(gid)
+                    genes.append(llist[1])
+                    try:
+                        matrix.append([int(pt) for pt in llist[2::]])
+                    except ValueError:
+                        matrix.append([float(pt) for pt in llist[2::]])
+        gids = np.array(gids)
+        ind = np.argsort(gids)
+        gids = gids[ind]
+        genes = np.array(genes)[ind]
+        matrix = np.array(matrix)[ind]
+    if matrix_INFILE.split('.')[-1] == 'loom':
+        loom = anndata.read_loom(matrix_INFILE, obs_names='', var_names='')
+        markers = pd.read_csv(marker_INFILE, sep='\t', header=None)
+        loom_filter = loom.T[np.isin(loom.T.obs['Accession'], markers[0])].copy().T
+        gids = loom_filter.var['Accession'].values
+        genes = loom_filter.var['Gene'].values
+        matrix = loom_filter.X.todense().T
     return gids, genes, matrix
 
 
