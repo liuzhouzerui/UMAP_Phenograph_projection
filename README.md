@@ -1,7 +1,7 @@
 # UMAP and Phenograph projection
 
 # About
-This pipeline is created to project single cell RNA sequencing profiles from one dataset to another based on Spearman's correlation as a distance. This is useful for multi dataset integration. 
+This pipeline is created to project single cell RNA sequencing profiles from one dataset to another based on Spearman's correlation as a distance. This is useful for multi dataset integrated embedding and cluster classification. 
 
 # Dependencies
 
